@@ -20,7 +20,6 @@ var Eisdealer;
             this.occupied = true;
         }
         draw() {
-            //console.log("draw Chair")
             const chairRadius = 20;
             const chairX = this.x + this.width / 2;
             const chairY = this.y + this.height / 2;
