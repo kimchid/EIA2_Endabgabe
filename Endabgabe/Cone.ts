@@ -8,7 +8,6 @@ namespace Eisdealer {
     }
 
     public draw(){
-        //console.log("drawCup")
         crc2.fillStyle = "tan";
         crc2.beginPath();
         crc2.moveTo(825, 550); // Start point (left vertex)

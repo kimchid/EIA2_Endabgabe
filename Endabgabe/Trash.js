@@ -8,7 +8,6 @@ var Eisdealer;
             this.radius = 50;
         }
         draw() {
-            //console.log("trash draw");
             // Mülltonne
             Eisdealer.crc2.beginPath();
             Eisdealer.crc2.arc(this.x, this.y, this.radius, 0, Math.PI * 1);

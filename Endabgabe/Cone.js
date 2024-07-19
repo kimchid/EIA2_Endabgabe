@@ -6,7 +6,6 @@ var Eisdealer;
             super(_x, _y);
         }
         draw() {
-            //console.log("drawCup")
             Eisdealer.crc2.fillStyle = "tan";
             Eisdealer.crc2.beginPath();
             Eisdealer.crc2.moveTo(825, 550); // Start point (left vertex)
