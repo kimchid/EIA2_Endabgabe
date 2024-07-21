@@ -19,6 +19,10 @@ var Eisdealer;
         occupy() {
             this.occupied = true;
         }
+        free() {
+            this.occupied = false;
+            //console.log("der chair ist free");
+        }
         draw() {
             const chairRadius = 20;
             const chairX = this.x + this.width / 2;

@@ -1,19 +1,13 @@
 "use strict";
-// cash.ts
+// cashRegister.ts
 var Eisdealer;
 (function (Eisdealer) {
     class CashRegister {
         total = 0;
-        constructor() {
-            // Initialisierung, falls nötig
-        }
-        // Methode zum Hinzufügen eines Betrags zur Kasse
+        constructor() { }
         add(amount) {
-            if (amount > 0) {
-                this.total += amount;
-            }
+            this.total += amount;
         }
-        // Methode zum Abrufen des aktuellen Gesamtbetrags
         getTotal() {
             return this.total;
         }

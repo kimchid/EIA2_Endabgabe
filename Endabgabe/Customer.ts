@@ -3,6 +3,7 @@ namespace Eisdealer {
         private radius: number;
         private skin: string;
         private targetChair: Chair | null;
+        public state: "waiting" | "coming" | "ordering" | "eating" | "paying" | "leaving";
         private allObjects: Drawables[];
         public order: { flavor: string }[];
         public orderCompleted: boolean = false;
@@ -50,12 +51,8 @@ namespace Eisdealer {
                 }
             }
 
-            if (this.orderCompleted) {
-                if (this.isOrderCorrect()) {
-                    this.mood = 'ecstatic'; // Set mood to ecstatic if the order is correct
-                } else {
-                    this.mood = 'happy'; // Default to happy if not ecstatic
-                }
+            if (this.orderCompleted && this.isOrderCorrect()) {
+                this.mood = 'ecstatic'; // Set mood to ecstatic if the order is correct
                 this.speed = new Vector(1, 1); // Adjust speed when order is completed
                 this.leaving = true; // Mark the customer as leaving
             } else {
@@ -181,4 +178,3 @@ namespace Eisdealer {
         }
     }
 }
-

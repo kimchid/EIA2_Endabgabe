@@ -5,6 +5,7 @@ var Eisdealer;
         radius;
         skin;
         targetChair;
+        state;
         allObjects;
         order;
         orderCompleted = false;
@@ -44,13 +45,8 @@ var Eisdealer;
                     this.placeOrder();
                 }
             }
-            if (this.orderCompleted) {
-                if (this.isOrderCorrect()) {
-                    this.mood = 'ecstatic'; // Set mood to ecstatic if the order is correct
-                }
-                else {
-                    this.mood = 'happy'; // Default to happy if not ecstatic
-                }
+            if (this.orderCompleted && this.isOrderCorrect()) {
+                this.mood = 'ecstatic'; // Set mood to ecstatic if the order is correct
                 this.speed = new Eisdealer.Vector(1, 1); // Adjust speed when order is completed
                 this.leaving = true; // Mark the customer as leaving
             }

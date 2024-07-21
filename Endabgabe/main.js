@@ -1,5 +1,4 @@
 "use strict";
-// main.ts
 var Eisdealer;
 (function (Eisdealer) {
     window.addEventListener("load", handleLoad);
@@ -12,9 +11,12 @@ var Eisdealer;
     let maxCustomers = 4;
     let cashRegister;
     let totalElement;
+    let orderItems = [];
+    const sidebarX = 1200;
+    let canvas;
     function handleLoad(_event) {
         console.log("handleLoad");
-        let canvas = document.querySelector("canvas");
+        canvas = document.querySelector("canvas");
         if (!canvas)
             return;
         Eisdealer.crc2 = canvas.getContext("2d");
@@ -24,19 +26,18 @@ var Eisdealer;
         createCustomer();
         cashRegister = new Eisdealer.CashRegister();
         drawPriceList();
-        // Create the total element and add it to the document
         totalElement = document.createElement("div");
         totalElement.id = "total";
         totalElement.style.position = "absolute";
         totalElement.style.left = "1850px";
         totalElement.style.top = "80px";
         totalElement.style.fontSize = "20px";
+        totalElement.style.zIndex = "10"; // Ensure the totalElement is in front of the canvas
         document.body.appendChild(totalElement);
-        // Initial display
         updateTotalDisplay();
     }
     function initializeObjects() {
-        let trash = new Eisdealer.Trash(1250, 100);
+        let trash = new Eisdealer.Trash(1000, 350);
         Eisdealer.allObjects.push(trash);
         const chairs = [
             new Eisdealer.Chair(100, 100),
@@ -52,6 +53,10 @@ var Eisdealer;
             new Eisdealer.Scoop(500, 575, colorPistacchio)
         ];
         Eisdealer.allObjects.push(...scoops);
+        scoops.forEach(scoop => {
+            const iceCreamItem = scoop.getIceCreamItem();
+            console.log(`Scoop at (${scoop.x}, ${scoop.y}) is ${iceCreamItem?.name} and costs ${iceCreamItem?.price}`);
+        });
     }
     function createCustomer() {
         function createCustomersIfNeeded() {
@@ -59,9 +64,8 @@ var Eisdealer;
             if (customerCount < maxCustomers) {
                 let customerX = 500;
                 let customerY = -50;
-                let customer = new Eisdealer.Customer(customerX, customerY, new Eisdealer.Vector(0, 0), new Eisdealer.Vector(4, 4), `Customer ${customerCount + 1}`, Eisdealer.allObjects);
+                let customer = new Eisdealer.Customer(customerX, customerY, new Eisdealer.Vector(4, 4), new Eisdealer.Vector(4, 4), `Customer ${customerCount + 1}`, Eisdealer.allObjects);
                 Eisdealer.allObjects.push(customer);
-                customer.findNextUnoccupiedChair();
             }
             if (customerCount < maxCustomers) {
                 setTimeout(createCustomersIfNeeded, 3000);
@@ -102,7 +106,7 @@ var Eisdealer;
         let clickY = event.clientY - canvasRect.top;
         Eisdealer.allObjects.forEach(item => {
             if (item instanceof Eisdealer.Trash) {
-                const distance = Math.sqrt(Math.pow(clickX - item.x, 2) + Math.pow(clickY - item.y, 2));
+                const distance = calculateDistance(clickX, clickY, item.x, item.y);
                 if (distance <= 50) {
                     deleteScoopChosen();
                     return;
@@ -111,10 +115,10 @@ var Eisdealer;
         });
         Eisdealer.allObjects.forEach(item => {
             if (item instanceof Eisdealer.Customer) {
-                const distance = Math.sqrt(Math.pow(clickX - item.x, 2) + Math.pow(clickY - item.y, 2));
+                const distance = calculateDistance(clickX, clickY, item.x, item.y);
                 if (distance <= 50) {
                     checkOrder(item);
-                    deleteScoopChosen();
+                    return;
                 }
             }
         });
@@ -131,17 +135,20 @@ var Eisdealer;
         if (chosenScoops.length < maxScoops) {
             for (const item of Eisdealer.allObjects) {
                 if (item instanceof Eisdealer.Scoop) {
-                    const distance = Math.sqrt(Math.pow(clickX - item.x, 2) + Math.pow(clickY - item.y, 2));
+                    const distance = calculateDistance(clickX, clickY, item.x, item.y);
                     if (distance <= scoopRadius) {
                         let flavorChosenScoop;
                         if (item.color === colorPistacchio) {
-                            flavorChosenScoop = 'pistacchio';
+                            flavorChosenScoop = 'Pistazie';
                         }
                         else if (item.color === colorStrawberry) {
-                            flavorChosenScoop = 'strawberry';
+                            flavorChosenScoop = 'Erdbeere';
                         }
                         else if (item.color === colorVanille) {
-                            flavorChosenScoop = 'vanille';
+                            flavorChosenScoop = 'Vanille';
+                        }
+                        else if (item.color === colorChocolate) {
+                            flavorChosenScoop = 'Schokolade';
                         }
                         else {
                             flavorChosenScoop = 'unknown';
@@ -153,11 +160,15 @@ var Eisdealer;
                             let cone = new Eisdealer.Cone(900, 400);
                             Eisdealer.allObjects.push(cone);
                         }
+                        addItemToOrder(item, 1); // Add scoop to order
                         break;
                     }
                 }
             }
         }
+    }
+    function calculateDistance(x1, y1, x2, y2) {
+        return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
     }
     function checkOrder(customer) {
         let correct = true;
@@ -173,11 +184,12 @@ var Eisdealer;
             customer.orderCompleted = true;
             customer.leaving = true;
             cashRegister.add(chosenScoops.length * 2);
-            updateTotalDisplay(); // Update the total display when an order is completed
+            updateTotalDisplay();
+            deleteScoopChosen(); // Clear chosen scoops after order is completed
         }
     }
     function drawBackground() {
-        const canvasWidth = 2000;
+        const canvasWidth = 1150;
         const canvasHeight = 800;
         const backgroundColor = '#d3d3d3';
         Eisdealer.crc2.fillStyle = backgroundColor;
@@ -189,21 +201,29 @@ var Eisdealer;
         Eisdealer.crc2.fillStyle = "#000000";
         Eisdealer.crc2.font = "20px Arial";
         Eisdealer.crc2.fillText("Total: ", 1800, 100);
-        // No need to create totalElement here; it's created once in handleLoad
     }
     function drawPriceList() {
-        const sidebarX = 1500;
-        Eisdealer.crc2.strokeRect(sidebarX, 200, 400, 250);
         Eisdealer.crc2.font = "30px Arial";
-        Eisdealer.crc2.fillText("Preisliste", sidebarX + 20, 260);
-        Eisdealer.iceCreamItems.forEach((item, index) => {
-            Eisdealer.crc2.fillText(`${item.name}: ${item.price}€`, sidebarX + 50, 320 + index * 40);
-        });
+        // Draw Cash Register
+        Eisdealer.crc2.strokeRect(sidebarX, 450, 300, 250);
+        Eisdealer.crc2.fillText("Total", sidebarX + 10, 500);
+        Eisdealer.crc2.strokeRect(sidebarX + 50, 550, 200, 80);
     }
-    function updateTotalDisplay() {
-        if (totalElement) {
-            totalElement.textContent = `Total: ${cashRegister.getTotal()}€`;
+    function addItemToOrder(item, quantity) {
+        const existingItem = orderItems.find(orderItem => orderItem.name === item.name);
+        if (existingItem) {
+            existingItem.quantity += quantity;
+            existingItem.price += item.price * quantity;
         }
+        else {
+            orderItems.push({ name: item.name, quantity, price: item.price * quantity });
+        }
+        updateTotal();
+    }
+    function updateTotal() {
+        const total = orderItems.reduce((sum, item) => sum + item.price, 0);
+        Eisdealer.crc2.clearRect(sidebarX + 50, 550, 200, 80);
+        Eisdealer.crc2.fillText(total.toFixed(2) + "€", sidebarX + 170, 600);
     }
 })(Eisdealer || (Eisdealer = {}));
 //# sourceMappingURL=main.js.map

@@ -22,6 +22,11 @@ namespace Eisdealer {
             this.occupied = true;
         }
 
+        public free(): void {
+            this.occupied = false;
+            //console.log("der chair ist free");
+        }
+
         draw(): void {
             const chairRadius = 20;
             const chairX = this.x + this.width / 2;

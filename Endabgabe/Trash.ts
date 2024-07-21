@@ -5,20 +5,18 @@ namespace Eisdealer {
 
     constructor(_x: number, _y: number) {
         super(_x, _y);
-        this.radius = 50;
+        this.radius = 30;
     }
 
     public draw(){
-         // Mülltonne
-         crc2.beginPath();
-         crc2.arc(this.x, this.y, this.radius, 0, Math.PI * 1);
-         crc2.fillStyle = '#808080'; 
-         crc2.fill();
- 
-         crc2.beginPath();
-         crc2.arc(this.x, this.y, 40, 0, Math.PI * 1);
-         crc2.strokeStyle = '#fffff';
-         crc2.stroke();
+        crc2.beginPath();
+        crc2.arc(this.x, this.y, this.radius, Math.PI / 2, 3 * Math.PI / 2); // Von oben links bis unten rechts
+        crc2.lineTo(this.x, this.y); // Zur Mitte zurückkehren
+        crc2.closePath(); // Pfad schließen
+        crc2.fillStyle = '#808080'; 
+        crc2.fill();
+        crc2.strokeStyle = '#00000';
+        crc2.stroke();
  
      }
     }
