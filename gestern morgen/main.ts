@@ -44,7 +44,7 @@ namespace Eisdealer {
     }
 
     function initializeObjects(): void {
-        let trash: Trash = new Trash(1000, 350);
+        let trash: Trash = new Trash(1100, 350);
         allObjects.push(trash);
 
         const chairs = [
@@ -262,6 +262,7 @@ function handleScoopClick(clickX: number, clickY: number): void {
 
     function drawPriceList(): void {
         crc2.font = "30px Arial";
+        crc2.fillStyle = '#00000';
 
         // Draw Cash Register
         crc2.strokeRect(sidebarX, 450, 300, 250);
@@ -284,6 +285,7 @@ function handleScoopClick(clickX: number, clickY: number): void {
         const total = orderItems.reduce((sum, item) => sum + item.price, 0);
         crc2.clearRect(sidebarX + 50, 550, 200, 80);
         crc2.fillText(total.toFixed(2) + "€", sidebarX + 170, 600);
+        crc2.fillStyle = '#00000';
 
         updateTotalDisplay(); // Update the display
     }

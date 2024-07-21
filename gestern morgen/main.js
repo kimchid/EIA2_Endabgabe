@@ -37,7 +37,7 @@ var Eisdealer;
         updateTotalDisplay();
     }
     function initializeObjects() {
-        let trash = new Eisdealer.Trash(1000, 350);
+        let trash = new Eisdealer.Trash(1100, 350);
         Eisdealer.allObjects.push(trash);
         const chairs = [
             new Eisdealer.Chair(100, 100),
@@ -214,6 +214,7 @@ var Eisdealer;
     }
     function drawPriceList() {
         Eisdealer.crc2.font = "30px Arial";
+        Eisdealer.crc2.fillStyle = '#00000';
         // Draw Cash Register
         Eisdealer.crc2.strokeRect(sidebarX, 450, 300, 250);
         Eisdealer.crc2.fillText("Total", sidebarX + 10, 500);
@@ -234,6 +235,7 @@ var Eisdealer;
         const total = orderItems.reduce((sum, item) => sum + item.price, 0);
         Eisdealer.crc2.clearRect(sidebarX + 50, 550, 200, 80);
         Eisdealer.crc2.fillText(total.toFixed(2) + "€", sidebarX + 170, 600);
+        Eisdealer.crc2.fillStyle = '#00000';
         updateTotalDisplay(); // Update the display
     }
     function updateTotalDisplay() {

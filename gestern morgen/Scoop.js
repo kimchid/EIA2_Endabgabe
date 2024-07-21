@@ -1,29 +1,19 @@
 "use strict";
 var Eisdealer;
 (function (Eisdealer) {
-    // Define the Drawables base class if it isn't already defined
-    class Drawables {
-        x;
-        y;
-        constructor(x, y) {
-            this.x = x;
-            this.y = y;
-        }
-    }
-    class Scoop extends Drawables {
+    class Scoop extends Eisdealer.Drawables {
         name;
         price;
-        radius;
+        size; // Use size instead of radius
         color;
         constructor(_x, _y, _color) {
             super(_x, _y);
-            this.radius = 80;
+            this.size = 175; // Increased size for a larger square
             this.color = _color;
-            this.name = this.determineName(_color); // Set a name based on color
-            this.price = this.determinePrice(_color); // Set a price based on color
+            this.name = this.determineName(_color);
+            this.price = this.determinePrice(_color);
         }
         determineName(color) {
-            // Define names based on color
             switch (color) {
                 case colorPistacchio:
                     return 'Pistachio';
@@ -38,24 +28,23 @@ var Eisdealer;
             }
         }
         determinePrice(color) {
-            // Define prices based on color
             switch (color) {
                 case colorPistacchio:
-                    return 2.5;
+                    return 2;
                 case colorStrawberry:
-                    return 2.0;
+                    return 2;
                 case colorVanille:
-                    return 1.5;
+                    return 2;
                 case colorChocolate:
-                    return 2.0;
+                    return 2;
                 default:
-                    return 1.0;
+                    return 0;
             }
         }
         draw() {
             Eisdealer.crc2.lineWidth = 8;
             Eisdealer.crc2.beginPath();
-            Eisdealer.crc2.arc(this.x, this.y, this.radius, 0, 2 * Math.PI); // Use arc for circles
+            Eisdealer.crc2.rect(this.x - this.size / 2, this.y - this.size / 2, this.size, this.size); // Draw a larger square
             Eisdealer.crc2.fillStyle = this.color;
             Eisdealer.crc2.fill();
             Eisdealer.crc2.lineWidth = 2;
@@ -63,14 +52,13 @@ var Eisdealer;
         }
     }
     Eisdealer.Scoop = Scoop;
-    // Example usage of color variables
+    // Define colors
     let colorPistacchio = "#93c572";
     let colorStrawberry = "#d47274";
     let colorVanille = "#F3E5AB";
     let colorChocolate = "#45322e";
-    // Example code to demonstrate creating a scoop
+    // Example of creating and drawing a larger square scoop
     let exampleScoop = new Scoop(100, 100, colorChocolate);
-    // Assuming crc2 is your CanvasRenderingContext2D and has been set up
     exampleScoop.draw();
 })(Eisdealer || (Eisdealer = {}));
 //# sourceMappingURL=Scoop.js.map
