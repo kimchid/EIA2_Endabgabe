@@ -57,8 +57,5 @@ var Eisdealer;
     let colorStrawberry = "#d47274";
     let colorVanille = "#F3E5AB";
     let colorChocolate = "#45322e";
-    // Example of creating and drawing a larger square scoop
-    let exampleScoop = new Scoop(100, 100, colorChocolate);
-    exampleScoop.draw();
 })(Eisdealer || (Eisdealer = {}));
 //# sourceMappingURL=Scoop.js.map

@@ -9,7 +9,6 @@ var Eisdealer;
     let colorVanille = "#F3E5AB";
     let colorChocolate = "#45322e";
     let maxCustomers = 4;
-    let cashRegister;
     let totalElement;
     let orderItems = [];
     const sidebarX = 1200;
@@ -23,7 +22,6 @@ var Eisdealer;
         initializeObjects();
         setInterval(animate, 20);
         createCustomer();
-        cashRegister = new Eisdealer.CashRegister();
         drawPriceList();
         totalElement = document.createElement("div");
         totalElement.id = "total";
@@ -59,7 +57,7 @@ var Eisdealer;
             if (customerCount < maxCustomers) {
                 let customerX = 500;
                 let customerY = -50;
-                let customer = new Eisdealer.Customer(customerX, customerY, new Eisdealer.Vector(0, 0), new Eisdealer.Vector(4, 4), `Customer ${customerCount + 5}`, Eisdealer.allObjects);
+                let customer = new Eisdealer.Customer(customerX, customerY, new Eisdealer.Vector(0, 0), new Eisdealer.Vector(4, 4), `Customer ${customerCount + 0}`, Eisdealer.allObjects);
                 Eisdealer.allObjects.push(customer);
             }
             if (customerCount < maxCustomers) {
@@ -193,7 +191,6 @@ var Eisdealer;
         if (correct) {
             customer.orderCompleted = true;
             customer.leaving = true;
-            cashRegister.add(chosenScoops.length * 2);
             updateTotalDisplay();
         }
     }
@@ -215,12 +212,16 @@ var Eisdealer;
         Eisdealer.crc2.font = "30px Arial";
         Eisdealer.crc2.fillStyle = '#00000';
         // Draw Cash Register
-        Eisdealer.crc2.strokeRect(sidebarX, 200, 300, 200);
+        Eisdealer.crc2.strokeRect(sidebarX, 0, 300, 200);
         Eisdealer.crc2.font = "30px Arial";
-        Eisdealer.crc2.fillText("Preisliste", sidebarX + 20, 260);
-        Eisdealer.crc2.fillText("je Kugel: 2€", sidebarX + 50, 320);
-        Eisdealer.crc2.fillText("Waffel: 0€", sidebarX + 50, 360);
+        Eisdealer.crc2.fillText("Einnahmen", sidebarX + 10, 50);
+        Eisdealer.crc2.strokeRect(sidebarX + 50, 90, 200, 60);
+        Eisdealer.crc2.strokeRect(sidebarX, 250, 300, 150);
+        Eisdealer.crc2.font = "30px Arial";
+        Eisdealer.crc2.fillText("Preisliste", sidebarX + 10, 280);
+        Eisdealer.crc2.fillText("je Kugel: 2€", sidebarX + 50, 360);
         Eisdealer.crc2.strokeRect(sidebarX, 450, 300, 250);
+        Eisdealer.crc2.font = "30px Arial";
         Eisdealer.crc2.fillText("Total", sidebarX + 10, 500);
         Eisdealer.crc2.strokeRect(sidebarX + 50, 550, 200, 80);
     }
@@ -238,13 +239,14 @@ var Eisdealer;
     function updateTotal() {
         const total = orderItems.reduce((sum, item) => sum + item.price, 0);
         Eisdealer.crc2.clearRect(sidebarX + 50, 550, 200, 80);
-        Eisdealer.crc2.fillText(total.toFixed(2) + "€", sidebarX + 170, 600);
+        Eisdealer.crc2.fillText(total.toFixed(0) + "€", sidebarX + 170, 600);
         Eisdealer.crc2.fillStyle = '#00000';
         updateTotalDisplay(); // Update the display
     }
     function updateTotalDisplay() {
         const total = orderItems.reduce((sum, item) => sum + item.price, 0);
-        totalElement.textContent = "Total: " + total.toFixed(2) + "€";
+        Eisdealer.crc2.fillStyle = '#00000';
+        totalElement.textContent = "Total: " + total.toFixed(0) + "€";
     }
     const iceCreamItems = [
         { name: 'Vanilla', x: 150, y: 575, price: 2 },

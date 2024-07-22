@@ -60,7 +60,4 @@ namespace Eisdealer {
     let colorVanille: string = "#F3E5AB";
     let colorChocolate: string = "#45322e";
 
-    // Example of creating and drawing a larger square scoop
-    let exampleScoop = new Scoop(100, 100, colorChocolate);
-    exampleScoop.draw();
 }

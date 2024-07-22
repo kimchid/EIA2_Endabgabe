@@ -3,56 +3,98 @@ namespace Eisdealer {
         private radius: number = 40;
         private skin: string = "#ffffff";
         private targetChair: Chair | null = null;
-        public state: "waiting" | "coming" | "ordering" | "eating" | "paying" | "leaving" = "coming";
         private allObjects: Drawables[];
         public order: { flavor: string }[] = [];
         public orderCompleted: boolean = false;
         public leaving: boolean = false;
         private waitStartTime: number = Date.now();
         private mood: 'happy' | 'sad' | 'ecstatic' = 'happy';
-
+        public state: "walk in" | "sit" | "pay" | "leave"; 
+   
+        public assignedChair: Chair | null;
+    
+        public customerPay: boolean = false;
+        public paid: boolean = false;
+        public orderCorrect: boolean = false;
+        public orderChecked : boolean = false;
+    
         constructor(_x: number, _y: number, _direction: Vector, _speed: Vector, _type: string, allObjects: Drawables[]) {
-            super(_x, _y, _direction, _speed, _type);
+            super (_x, _y, _direction, _speed, _type)
+            this.radius = 40;
+    
+            this.targetChair = null;
+            this.assignedChair = null; 
             this.allObjects = allObjects;
+    
+            this.order = [];
+            this.orderCompleted = false;
+            this.orderChecked = false;
+            this.state = "walk in"; // Initialize the state
         }
-
+    
         public move(): void {
-            if (this.leaving) {
-                this.leave();
-                return;
-            }
+            switch (this.state) {
+                case "walk in":
+                    if (!this.targetChair || this.targetChair.isOccupied()) {
+                        this.findNextUnoccupiedChair();
+                    }
 
-            if (!this.targetChair || this.targetChair.isOccupied()) {
-                this.findNextUnoccupiedChair();
-            }
+                    if (this.targetChair) {
+                        const dx = this.targetChair.x - this.x + 50;
+                        const dy = this.targetChair.y - this.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        const moveDistance = Math.min(this.speed.x, distance);
 
-            if (this.targetChair) {
-                const dx = this.targetChair.x - this.x + 50;
-                const dy = this.targetChair.y - this.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                const moveDistance = Math.min(this.speed.x, distance);
+                        this.x += (dx / distance) * moveDistance;
+                        this.y += (dy / distance) * moveDistance;
 
-                this.x += (dx / distance) * moveDistance;
-                this.y += (dy / distance) * moveDistance;
+                        if (distance < this.speed.x) {
+                            this.targetChair.occupy();
+                            this.speed = new Vector(0, 0);
+                            this.assignedChair = this.targetChair;
+                            this.targetChair = null;
+                            
+                            // Bestellung aufgeben:
+                            this.placeOrder();
+                            this.state = "sit";
+                            this.waitStartTime = Date.now();  // Startzeit für das Warten setzen
+                        }
+                    }
+                    break;
 
-                if (distance < this.speed.x) {
-                    this.targetChair.occupy();
-                    this.speed = new Vector(0, 0);
-                    this.targetChair = null;
-                    this.waitStartTime = Date.now();
-                    this.placeOrder();
-                }
-            }
+                case "sit":
+                    if (this.orderCompleted && this.isOrderCorrect()) {
+                        this.mood = 'ecstatic';
+                        this.speed = new Vector(1, 1);
+                        this.state = "leave";
+                        this.leaving = true;
+                    } else if (Date.now() - this.waitStartTime > 40000) {
+                        this.mood = 'sad';
+                    }
+                    break;
 
-            if (this.orderCompleted && this.isOrderCorrect()) {
-                this.mood = 'ecstatic';
-                this.speed = new Vector(1, 1);
-                this.leaving = true;
-            } else if (Date.now() - this.waitStartTime > 20000) {
-                this.mood = 'sad';
+                case "leave":
+                    const targetX = 500;
+                    const targetY = 600;
+                    const dxLeave = targetX - this.x;
+                    const dyLeave = targetY - this.y;
+                    const distanceLeave = Math.sqrt(dxLeave * dxLeave + dyLeave * dyLeave);
+                    this.speed = new Vector(2, 2);
+                    const moveDistanceLeave = Math.min(this.speed.x, distanceLeave);
+                
+                    this.x += (dxLeave / distanceLeave) * moveDistanceLeave;
+                    this.y += (dyLeave / distanceLeave) * moveDistanceLeave;
+                
+                    if (this.y > 99) {
+                        if (this.assignedChair) {
+                            this.assignedChair.free();
+                        }
+                        this.allObjects = this.allObjects.filter(obj => obj !== this);
+                        this.createSingleCustomer();
+                    }
+                    break;
             }
         }
-
         private findNextUnoccupiedChair(): void {
             for (const obj of this.allObjects) {
                 if (obj instanceof Chair && !obj.isOccupied()) {
@@ -60,6 +102,32 @@ namespace Eisdealer {
                     break;
                 }
             }
+        }
+    
+        public createSingleCustomer(): void {
+            let customerX = 500;
+            let customerY = -50;
+            let customer = new Customer(customerX, customerY, new Vector(0, 0), new Vector(4, 4), `Customer`, this.allObjects);
+            this.allObjects.push(customer); // Kunden zu allObjects hinzufügen
+            customer.state = "walk in";
+            customer.mood ="happy";
+        }
+
+        public getReceipt(): number {
+            let amount = 0;
+            let receiptContent = "<h3>Receipt</h3><ul>";
+    
+        
+            receiptContent += `</ul><p>Total: ${amount} €</p>`;
+            //console.log(`Receipt for ${this.type}: Total Price = ${amount} credits`);
+        
+            // Füge den Receipt-Content in das HTML-Element mit der ID "receipt" ein
+            const receiptElement = document.getElementById("receipt");
+            if (receiptElement) {
+                receiptElement.innerHTML = receiptContent;
+            }
+        
+            return amount;
         }
 
         private placeOrder(): void {
@@ -87,7 +155,6 @@ namespace Eisdealer {
             this.y += (dy / distance) * moveDistance;
 
             if (this.y < -50) {
-                console.log(`${this.type} left the shop.`);
                 const index = this.allObjects.indexOf(this);
                 if (index > -1) {
                     this.allObjects.splice(index, 1);
@@ -146,7 +213,7 @@ namespace Eisdealer {
         public update(): void {}
 
         public hasLeft(): boolean {
-            return this.y < -50;
+            return this.y > 699; // Adjusted for leaving condition
         }
     }
 }

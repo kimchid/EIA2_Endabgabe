@@ -19,6 +19,9 @@ var Eisdealer;
         occupy() {
             this.occupied = true;
         }
+        free() {
+            this.occupied = false;
+        }
         draw() {
             const chairRadius = 20;
             const chairX = this.x + this.width / 2;

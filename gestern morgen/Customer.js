@@ -5,47 +5,83 @@ var Eisdealer;
         radius = 40;
         skin = "#ffffff";
         targetChair = null;
-        state = "coming";
         allObjects;
         order = [];
         orderCompleted = false;
         leaving = false;
         waitStartTime = Date.now();
         mood = 'happy';
+        state;
+        assignedChair;
+        customerPay = false;
+        paid = false;
+        orderCorrect = false;
+        orderChecked = false;
         constructor(_x, _y, _direction, _speed, _type, allObjects) {
             super(_x, _y, _direction, _speed, _type);
+            this.radius = 40;
+            this.targetChair = null;
+            this.assignedChair = null;
             this.allObjects = allObjects;
+            this.order = [];
+            this.orderCompleted = false;
+            this.orderChecked = false;
+            this.state = "walk in"; // Initialize the state
         }
         move() {
-            if (this.leaving) {
-                this.leave();
-                return;
-            }
-            if (!this.targetChair || this.targetChair.isOccupied()) {
-                this.findNextUnoccupiedChair();
-            }
-            if (this.targetChair) {
-                const dx = this.targetChair.x - this.x + 50;
-                const dy = this.targetChair.y - this.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                const moveDistance = Math.min(this.speed.x, distance);
-                this.x += (dx / distance) * moveDistance;
-                this.y += (dy / distance) * moveDistance;
-                if (distance < this.speed.x) {
-                    this.targetChair.occupy();
-                    this.speed = new Eisdealer.Vector(0, 0);
-                    this.targetChair = null;
-                    this.waitStartTime = Date.now();
-                    this.placeOrder();
-                }
-            }
-            if (this.orderCompleted && this.isOrderCorrect()) {
-                this.mood = 'ecstatic';
-                this.speed = new Eisdealer.Vector(1, 1);
-                this.leaving = true;
-            }
-            else if (Date.now() - this.waitStartTime > 20000) {
-                this.mood = 'sad';
+            switch (this.state) {
+                case "walk in":
+                    if (!this.targetChair || this.targetChair.isOccupied()) {
+                        this.findNextUnoccupiedChair();
+                    }
+                    if (this.targetChair) {
+                        const dx = this.targetChair.x - this.x + 50;
+                        const dy = this.targetChair.y - this.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        const moveDistance = Math.min(this.speed.x, distance);
+                        this.x += (dx / distance) * moveDistance;
+                        this.y += (dy / distance) * moveDistance;
+                        if (distance < this.speed.x) {
+                            this.targetChair.occupy();
+                            this.speed = new Eisdealer.Vector(0, 0);
+                            this.assignedChair = this.targetChair;
+                            this.targetChair = null;
+                            // Bestellung aufgeben:
+                            this.placeOrder();
+                            this.state = "sit";
+                            this.waitStartTime = Date.now(); // Startzeit für das Warten setzen
+                        }
+                    }
+                    break;
+                case "sit":
+                    if (this.orderCompleted && this.isOrderCorrect()) {
+                        this.mood = 'ecstatic';
+                        this.speed = new Eisdealer.Vector(1, 1);
+                        this.state = "leave";
+                        this.leaving = true;
+                    }
+                    else if (Date.now() - this.waitStartTime > 40000) {
+                        this.mood = 'sad';
+                    }
+                    break;
+                case "leave":
+                    const targetX = 500;
+                    const targetY = 600;
+                    const dxLeave = targetX - this.x;
+                    const dyLeave = targetY - this.y;
+                    const distanceLeave = Math.sqrt(dxLeave * dxLeave + dyLeave * dyLeave);
+                    this.speed = new Eisdealer.Vector(2, 2);
+                    const moveDistanceLeave = Math.min(this.speed.x, distanceLeave);
+                    this.x += (dxLeave / distanceLeave) * moveDistanceLeave;
+                    this.y += (dyLeave / distanceLeave) * moveDistanceLeave;
+                    if (this.y > 99) {
+                        if (this.assignedChair) {
+                            this.assignedChair.free();
+                        }
+                        this.allObjects = this.allObjects.filter(obj => obj !== this);
+                        this.createSingleCustomer();
+                    }
+                    break;
             }
         }
         findNextUnoccupiedChair() {
@@ -55,6 +91,26 @@ var Eisdealer;
                     break;
                 }
             }
+        }
+        createSingleCustomer() {
+            let customerX = 500;
+            let customerY = -50;
+            let customer = new Customer(customerX, customerY, new Eisdealer.Vector(0, 0), new Eisdealer.Vector(4, 4), `Customer`, this.allObjects);
+            this.allObjects.push(customer); // Kunden zu allObjects hinzufügen
+            customer.state = "walk in";
+            customer.mood = "happy";
+        }
+        getReceipt() {
+            let amount = 0;
+            let receiptContent = "<h3>Receipt</h3><ul>";
+            receiptContent += `</ul><p>Total: ${amount} €</p>`;
+            //console.log(`Receipt for ${this.type}: Total Price = ${amount} credits`);
+            // Füge den Receipt-Content in das HTML-Element mit der ID "receipt" ein
+            const receiptElement = document.getElementById("receipt");
+            if (receiptElement) {
+                receiptElement.innerHTML = receiptContent;
+            }
+            return amount;
         }
         placeOrder() {
             const numScoops = Math.floor(Math.random() * 2) + 1;
@@ -77,7 +133,6 @@ var Eisdealer;
             this.x += (dx / distance) * moveDistance;
             this.y += (dy / distance) * moveDistance;
             if (this.y < -50) {
-                console.log(`${this.type} left the shop.`);
                 const index = this.allObjects.indexOf(this);
                 if (index > -1) {
                     this.allObjects.splice(index, 1);
@@ -132,7 +187,7 @@ var Eisdealer;
         }
         update() { }
         hasLeft() {
-            return this.y < -50;
+            return this.y > 699; // Adjusted for leaving condition
         }
     }
     Eisdealer.Customer = Customer;
