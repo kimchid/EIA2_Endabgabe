@@ -68,7 +68,7 @@ namespace Eisdealer {
             if (customerCount < maxCustomers) {
                 let customerX = 500;
                 let customerY = -50;
-                let customer = new Customer(customerX, customerY, new Vector(0, 0), new Vector(4, 4), `Customer ${customerCount + 0}`, allObjects);
+                let customer = new Customer(customerX, customerY, new Vector(0, 0), new Vector(4, 4), `Customer ${customerCount + 1}`, allObjects);
                 allObjects.push(customer);
             }
 
@@ -234,9 +234,14 @@ namespace Eisdealer {
         if (correct) {
             customer.orderCompleted = true;
             customer.leaving = true;
-
-            updateTotalDisplay();
+            customer.orderCorrect = true;
+        } else {
+            customer.orderCompleted = true;
+            customer.leaving = true;
+            customer.orderCorrect = false;
         }
+
+        updateTotalDisplay();
     }
 
     function drawBackground(): void {

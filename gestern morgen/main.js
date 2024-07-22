@@ -57,7 +57,7 @@ var Eisdealer;
             if (customerCount < maxCustomers) {
                 let customerX = 500;
                 let customerY = -50;
-                let customer = new Eisdealer.Customer(customerX, customerY, new Eisdealer.Vector(0, 0), new Eisdealer.Vector(4, 4), `Customer ${customerCount + 0}`, Eisdealer.allObjects);
+                let customer = new Eisdealer.Customer(customerX, customerY, new Eisdealer.Vector(0, 0), new Eisdealer.Vector(4, 4), `Customer ${customerCount + 1}`, Eisdealer.allObjects);
                 Eisdealer.allObjects.push(customer);
             }
             if (customerCount < maxCustomers) {
@@ -191,8 +191,14 @@ var Eisdealer;
         if (correct) {
             customer.orderCompleted = true;
             customer.leaving = true;
-            updateTotalDisplay();
+            customer.orderCorrect = true;
         }
+        else {
+            customer.orderCompleted = true;
+            customer.leaving = true;
+            customer.orderCorrect = false;
+        }
+        updateTotalDisplay();
     }
     function drawBackground() {
         const canvasWidth = 1150;
