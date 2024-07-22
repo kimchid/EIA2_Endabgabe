@@ -12,7 +12,6 @@ var Eisdealer;
             this.type = _type;
         }
         draw() {
-            console.log("movables draw");
         }
         move() {
         }

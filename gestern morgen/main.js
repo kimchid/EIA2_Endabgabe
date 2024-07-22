@@ -15,7 +15,6 @@ var Eisdealer;
     const sidebarX = 1200;
     let canvas;
     function handleLoad(_event) {
-        console.log("handleLoad");
         canvas = document.querySelector("canvas");
         if (!canvas)
             return;
@@ -60,11 +59,11 @@ var Eisdealer;
             if (customerCount < maxCustomers) {
                 let customerX = 500;
                 let customerY = -50;
-                let customer = new Eisdealer.Customer(customerX, customerY, new Eisdealer.Vector(0, 0), new Eisdealer.Vector(4, 4), `Customer ${customerCount + 1}`, Eisdealer.allObjects);
+                let customer = new Eisdealer.Customer(customerX, customerY, new Eisdealer.Vector(0, 0), new Eisdealer.Vector(4, 4), `Customer ${customerCount + 5}`, Eisdealer.allObjects);
                 Eisdealer.allObjects.push(customer);
             }
             if (customerCount < maxCustomers) {
-                setTimeout(createCustomersIfNeeded, 3000);
+                setTimeout(createCustomersIfNeeded, 1000);
             }
         }
         createCustomersIfNeeded();
@@ -216,6 +215,11 @@ var Eisdealer;
         Eisdealer.crc2.font = "30px Arial";
         Eisdealer.crc2.fillStyle = '#00000';
         // Draw Cash Register
+        Eisdealer.crc2.strokeRect(sidebarX, 200, 300, 200);
+        Eisdealer.crc2.font = "30px Arial";
+        Eisdealer.crc2.fillText("Preisliste", sidebarX + 20, 260);
+        Eisdealer.crc2.fillText("je Kugel: 2€", sidebarX + 50, 320);
+        Eisdealer.crc2.fillText("Waffel: 0€", sidebarX + 50, 360);
         Eisdealer.crc2.strokeRect(sidebarX, 450, 300, 250);
         Eisdealer.crc2.fillText("Total", sidebarX + 10, 500);
         Eisdealer.crc2.strokeRect(sidebarX + 50, 550, 200, 80);
@@ -243,10 +247,10 @@ var Eisdealer;
         totalElement.textContent = "Total: " + total.toFixed(2) + "€";
     }
     const iceCreamItems = [
-        { name: 'Vanilla', x: 150, y: 575, price: 1.5 },
-        { name: 'Strawberry', x: 500, y: 350, price: 2.0 },
-        { name: 'Chocolate', x: 150, y: 350, price: 2.0 },
-        { name: 'Pistachio', x: 500, y: 575, price: 2.5 },
+        { name: 'Vanilla', x: 150, y: 575, price: 2 },
+        { name: 'Strawberry', x: 500, y: 350, price: 2 },
+        { name: 'Chocolate', x: 150, y: 350, price: 2 },
+        { name: 'Pistachio', x: 500, y: 575, price: 2 },
         // Add more items as needed
     ];
 })(Eisdealer || (Eisdealer = {}));

@@ -17,7 +17,6 @@ namespace Eisdealer {
     let canvas: HTMLCanvasElement;
 
     function handleLoad(_event: Event): void {
-        console.log("handleLoad");
         canvas = document.querySelector("canvas") as HTMLCanvasElement;
         if (!canvas) return;
         crc2 = canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -71,12 +70,12 @@ namespace Eisdealer {
             if (customerCount < maxCustomers) {
                 let customerX = 500;
                 let customerY = -50;
-                let customer = new Customer(customerX, customerY, new Vector(0, 0), new Vector(4, 4), `Customer ${customerCount + 1}`, allObjects);
+                let customer = new Customer(customerX, customerY, new Vector(0, 0), new Vector(4, 4), `Customer ${customerCount + 5}`, allObjects);
                 allObjects.push(customer);
             }
 
             if (customerCount < maxCustomers) {
-                setTimeout(createCustomersIfNeeded, 3000);
+                setTimeout(createCustomersIfNeeded, 1000);
             }
         }
         createCustomersIfNeeded();
@@ -162,60 +161,60 @@ namespace Eisdealer {
         handleScoopClick(clickX, clickY);
     }
 
-function handleScoopClick(clickX: number, clickY: number): void {
-    const scoopRadius = 50;
-    const maxScoops = 2;
-    const scoopPositions = [
-        { x: 850, y: 550 },
-        { x: 850, y: 525 },
-    ];
+    function handleScoopClick(clickX: number, clickY: number): void {
+        const scoopRadius = 50;
+        const maxScoops = 2;
+        const scoopPositions = [
+            { x: 850, y: 550 },
+            { x: 850, y: 525 },
+        ];
 
-    if (chosenScoops.length < maxScoops) {
-        for (const item of allObjects) {
-            if (item instanceof Scoop) {
-                const distance = calculateDistance(clickX, clickY, item.x, item.y);
-                if (distance <= scoopRadius) {
-                    let flavorChosenScoop: string;
+        if (chosenScoops.length < maxScoops) {
+            for (const item of allObjects) {
+                if (item instanceof Scoop) {
+                    const distance = calculateDistance(clickX, clickY, item.x, item.y);
+                    if (distance <= scoopRadius) {
+                        let flavorChosenScoop: string;
 
-                    switch (item.color) {
-                        case colorPistacchio:
-                            flavorChosenScoop = 'Pistazie';
-                            break;
-                        case colorStrawberry:
-                            flavorChosenScoop = 'Erdbeere';
-                            break;
-                        case colorVanille:
-                            flavorChosenScoop = 'Vanille';
-                            break;
-                        case colorChocolate:
-                            flavorChosenScoop = 'Schokolade';
-                            break;
-                        default:
-                            flavorChosenScoop = 'unknown';
-                            break;
+                        switch (item.color) {
+                            case colorPistacchio:
+                                flavorChosenScoop = 'Pistazie';
+                                break;
+                            case colorStrawberry:
+                                flavorChosenScoop = 'Erdbeere';
+                                break;
+                            case colorVanille:
+                                flavorChosenScoop = 'Vanille';
+                                break;
+                            case colorChocolate:
+                                flavorChosenScoop = 'Schokolade';
+                                break;
+                            default:
+                                flavorChosenScoop = 'unknown';
+                                break;
+                        }
+
+                        let chosenScoop = new ScoopChosen(
+                            scoopPositions[chosenScoops.length].x,
+                            scoopPositions[chosenScoops.length].y,
+                            item.color,
+                            flavorChosenScoop
+                        );
+                        chosenScoops.push(chosenScoop);
+                        allObjects.push(chosenScoop);
+
+                        if (chosenScoops.length === 1) {
+                            let cone = new Cone(900, 400);
+                            allObjects.push(cone);
+                        }
+
+                        addItemToOrder(item, 1); // Add scoop to order
+                        break;
                     }
-
-                    let chosenScoop = new ScoopChosen(
-                        scoopPositions[chosenScoops.length].x,
-                        scoopPositions[chosenScoops.length].y,
-                        item.color,
-                        flavorChosenScoop
-                    );
-                    chosenScoops.push(chosenScoop);
-                    allObjects.push(chosenScoop);
-
-                    if (chosenScoops.length === 1) {
-                        let cone = new Cone(900, 400);
-                        allObjects.push(cone);
-                    }
-
-                    addItemToOrder(item, 1); // Add scoop to order
-                    break;
                 }
             }
         }
     }
-}
 
     function calculateDistance(x1: number, y1: number, x2: number, y2: number): number {
         return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
@@ -265,6 +264,12 @@ function handleScoopClick(clickX: number, clickY: number): void {
         crc2.fillStyle = '#00000';
 
         // Draw Cash Register
+        crc2.strokeRect(sidebarX, 200, 300, 200);
+        crc2.font = "30px Arial";
+        crc2.fillText("Preisliste", sidebarX + 20, 260);
+        crc2.fillText("je Kugel: 2€", sidebarX + 50, 320);
+        crc2.fillText("Waffel: 0€", sidebarX + 50, 360);
+
         crc2.strokeRect(sidebarX, 450, 300, 250);
         crc2.fillText("Total", sidebarX + 10, 500);
         crc2.strokeRect(sidebarX + 50, 550, 200, 80);
@@ -296,10 +301,10 @@ function handleScoopClick(clickX: number, clickY: number): void {
     }
 
     const iceCreamItems = [
-        { name: 'Vanilla', x: 150, y: 575, price: 1.5 },
-        { name: 'Strawberry', x: 500, y: 350, price: 2.0 },
-        { name: 'Chocolate', x: 150, y: 350, price: 2.0 },
-        { name: 'Pistachio', x: 500, y: 575, price: 2.5 },
+        { name: 'Vanilla', x: 150, y: 575, price: 2 },
+        { name: 'Strawberry', x: 500, y: 350, price: 2 },
+        { name: 'Chocolate', x: 150, y: 350, price: 2 },
+        { name: 'Pistachio', x: 500, y: 575, price: 2 },
         // Add more items as needed
     ];
 }
