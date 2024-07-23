@@ -12,7 +12,6 @@ namespace Eisdealer {
         }
 
         public draw(): void {
-            console.log("movables draw");
         }
 
         public move(): void {

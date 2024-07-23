@@ -5,26 +5,26 @@ var Eisdealer;
     Eisdealer.allObjects = [];
     let chosenScoops = [];
     let colorPistacchio = "#93c572";
-    let colorStrawberry = "#d47274";
+    let colorStrawberry = "#C83f49";
     let colorVanille = "#F3E5AB";
     let colorChocolate = "#45322e";
     let maxCustomers = 4;
-    let cashRegister;
     let totalElement;
+    let checkoutButton;
+    let resetButton;
     let orderItems = [];
+    let totalIncome = 0;
     const sidebarX = 1200;
     let canvas;
     function handleLoad(_event) {
-        console.log("handleLoad");
         canvas = document.querySelector("canvas");
         if (!canvas)
             return;
         Eisdealer.crc2 = canvas.getContext("2d");
-        canvas.addEventListener("click", handleClick);
+        canvas.addEventListener("click", handleCanvasClick);
         initializeObjects();
         setInterval(animate, 20);
         createCustomer();
-        cashRegister = new Eisdealer.CashRegister();
         drawPriceList();
         totalElement = document.createElement("div");
         totalElement.id = "total";
@@ -34,10 +34,14 @@ var Eisdealer;
         totalElement.style.fontSize = "20px";
         totalElement.style.zIndex = "10"; // Ensure the totalElement is in front of the canvas
         document.body.appendChild(totalElement);
-        updateTotalDisplay();
+        checkoutButton = document.getElementById("checkoutButton");
+        checkoutButton.addEventListener("click", showCheckoutTotal);
+        resetButton = document.getElementById("resetButton");
+        resetButton.addEventListener("click", resetTotal);
+        updateTotal();
     }
     function initializeObjects() {
-        let trash = new Eisdealer.Trash(1000, 350);
+        let trash = new Eisdealer.Trash(1100, 350);
         Eisdealer.allObjects.push(trash);
         const chairs = [
             new Eisdealer.Chair(100, 100),
@@ -53,10 +57,6 @@ var Eisdealer;
             new Eisdealer.Scoop(500, 575, colorPistacchio)
         ];
         Eisdealer.allObjects.push(...scoops);
-        scoops.forEach(scoop => {
-            const iceCreamItem = scoop.getIceCreamItem();
-            console.log(`Scoop at (${scoop.x}, ${scoop.y}) is ${iceCreamItem?.name} and costs ${iceCreamItem?.price}`);
-        });
     }
     function createCustomer() {
         function createCustomersIfNeeded() {
@@ -64,11 +64,11 @@ var Eisdealer;
             if (customerCount < maxCustomers) {
                 let customerX = 500;
                 let customerY = -50;
-                let customer = new Eisdealer.Customer(customerX, customerY, new Eisdealer.Vector(4, 4), new Eisdealer.Vector(4, 4), `Customer ${customerCount + 1}`, Eisdealer.allObjects);
+                let customer = new Eisdealer.Customer(customerX, customerY, new Eisdealer.Vector(0, 0), new Eisdealer.Vector(4, 4), `Customer ${customerCount + 1}`, Eisdealer.allObjects);
                 Eisdealer.allObjects.push(customer);
             }
             if (customerCount < maxCustomers) {
-                setTimeout(createCustomersIfNeeded, 3000);
+                setTimeout(createCustomersIfNeeded, 1000);
             }
         }
         createCustomersIfNeeded();
@@ -100,10 +100,24 @@ var Eisdealer;
         chosenScoops = [];
         Eisdealer.allObjects = Eisdealer.allObjects.filter(obj => !(obj instanceof Eisdealer.ScoopChosen));
     }
-    function handleClick(event) {
-        let canvasRect = event.target.getBoundingClientRect();
-        let clickX = event.clientX - canvasRect.left;
-        let clickY = event.clientY - canvasRect.top;
+    function handleCanvasClick(event) {
+        const canvasRect = event.target.getBoundingClientRect();
+        const clickX = event.clientX - canvasRect.left;
+        const clickY = event.clientY - canvasRect.top;
+        iceCreamItems.forEach((option, index) => {
+            if (clickX > option.x &&
+                clickX < option.x + 200 &&
+                clickY > option.y &&
+                clickY < option.y + 150) {
+                addItemToOrder(iceCreamItems[index], 1);
+            }
+        });
+        if (clickX > 800 &&
+            clickX < 900 &&
+            clickY > 500 &&
+            clickY < 570) {
+            addItemToOrder(iceCreamItems[5], 1);
+        }
         Eisdealer.allObjects.forEach(item => {
             if (item instanceof Eisdealer.Trash) {
                 const distance = calculateDistance(clickX, clickY, item.x, item.y);
@@ -118,13 +132,12 @@ var Eisdealer;
                 const distance = calculateDistance(clickX, clickY, item.x, item.y);
                 if (distance <= 50) {
                     checkOrder(item);
-                    return;
+                    deleteScoopChosen();
                 }
             }
         });
         handleScoopClick(clickX, clickY);
     }
-    Eisdealer.handleClick = handleClick;
     function handleScoopClick(clickX, clickY) {
         const scoopRadius = 50;
         const maxScoops = 2;
@@ -138,20 +151,22 @@ var Eisdealer;
                     const distance = calculateDistance(clickX, clickY, item.x, item.y);
                     if (distance <= scoopRadius) {
                         let flavorChosenScoop;
-                        if (item.color === colorPistacchio) {
-                            flavorChosenScoop = 'Pistazie';
-                        }
-                        else if (item.color === colorStrawberry) {
-                            flavorChosenScoop = 'Erdbeere';
-                        }
-                        else if (item.color === colorVanille) {
-                            flavorChosenScoop = 'Vanille';
-                        }
-                        else if (item.color === colorChocolate) {
-                            flavorChosenScoop = 'Schokolade';
-                        }
-                        else {
-                            flavorChosenScoop = 'unknown';
+                        switch (item.color) {
+                            case colorPistacchio:
+                                flavorChosenScoop = 'Pistazie';
+                                break;
+                            case colorStrawberry:
+                                flavorChosenScoop = 'Erdbeere';
+                                break;
+                            case colorVanille:
+                                flavorChosenScoop = 'Vanille';
+                                break;
+                            case colorChocolate:
+                                flavorChosenScoop = 'Schokolade';
+                                break;
+                            default:
+                                flavorChosenScoop = 'unknown';
+                                break;
                         }
                         let chosenScoop = new Eisdealer.ScoopChosen(scoopPositions[chosenScoops.length].x, scoopPositions[chosenScoops.length].y, item.color, flavorChosenScoop);
                         chosenScoops.push(chosenScoop);
@@ -182,10 +197,17 @@ var Eisdealer;
         }
         if (correct) {
             customer.orderCompleted = true;
+            customer.orderCorrect = true;
             customer.leaving = true;
-            cashRegister.add(chosenScoops.length * 2);
-            updateTotalDisplay();
-            deleteScoopChosen(); // Clear chosen scoops after order is completed
+            // Add price to total income
+            const orderPrice = chosenScoops.length * 2; // Assuming each scoop costs 2€
+            totalIncome += orderPrice;
+            updateTotal();
+        }
+        else {
+            customer.orderCompleted = true;
+            customer.orderCorrect = false;
+            customer.leaving = true;
         }
     }
     function drawBackground() {
@@ -204,8 +226,14 @@ var Eisdealer;
     }
     function drawPriceList() {
         Eisdealer.crc2.font = "30px Arial";
+        Eisdealer.crc2.fillStyle = '#00000';
         // Draw Cash Register
+        Eisdealer.crc2.strokeRect(sidebarX, 250, 300, 150);
+        Eisdealer.crc2.font = "30px Arial";
+        Eisdealer.crc2.fillText("Preisliste", sidebarX + 10, 280);
+        Eisdealer.crc2.fillText("je Kugel: 2€", sidebarX + 50, 360);
         Eisdealer.crc2.strokeRect(sidebarX, 450, 300, 250);
+        Eisdealer.crc2.font = "30px Arial";
         Eisdealer.crc2.fillText("Total", sidebarX + 10, 500);
         Eisdealer.crc2.strokeRect(sidebarX + 50, 550, 200, 80);
     }
@@ -213,7 +241,7 @@ var Eisdealer;
         const existingItem = orderItems.find(orderItem => orderItem.name === item.name);
         if (existingItem) {
             existingItem.quantity += quantity;
-            existingItem.price += item.price * quantity;
+            existingItem.price = item.price * existingItem.quantity; // Update total price for this item
         }
         else {
             orderItems.push({ name: item.name, quantity, price: item.price * quantity });
@@ -223,7 +251,30 @@ var Eisdealer;
     function updateTotal() {
         const total = orderItems.reduce((sum, item) => sum + item.price, 0);
         Eisdealer.crc2.clearRect(sidebarX + 50, 550, 200, 80);
-        Eisdealer.crc2.fillText(total.toFixed(2) + "€", sidebarX + 170, 600);
+        Eisdealer.crc2.fillStyle = '#00000';
+        Eisdealer.crc2.fillText(total.toFixed(0) + "€", sidebarX + 170, 600);
     }
+    function showCheckoutTotal() {
+        const total = orderItems.reduce((sum, item) => sum + item.price, 0);
+        Eisdealer.crc2.clearRect(0, 0, Eisdealer.crc2.canvas.width, Eisdealer.crc2.canvas.height);
+        drawBackground();
+        drawPriceList();
+        Eisdealer.crc2.fillStyle = '#000000';
+        Eisdealer.crc2.font = "20px Arial";
+        Eisdealer.crc2.fillText(" Total: " + total.toFixed(0) + "€", Eisdealer.crc2.canvas.width - 200, 50);
+    }
+    function resetTotal() {
+        chosenScoops = [];
+        orderItems = [];
+        totalIncome = 0; // Reset total income
+        updateTotal();
+    }
+    const iceCreamItems = [
+        { name: 'Vanilla', x: 150, y: 575, price: 2 },
+        { name: 'Strawberry', x: 500, y: 350, price: 2 },
+        { name: 'Chocolate', x: 150, y: 350, price: 2 },
+        { name: 'Pistachio', x: 500, y: 575, price: 2 },
+        // Add more items as needed
+    ];
 })(Eisdealer || (Eisdealer = {}));
 //# sourceMappingURL=main.js.map

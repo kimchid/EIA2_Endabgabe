@@ -21,7 +21,6 @@ var Eisdealer;
         }
         free() {
             this.occupied = false;
-            //console.log("der chair ist free");
         }
         draw() {
             const chairRadius = 20;

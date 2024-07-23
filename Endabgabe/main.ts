@@ -5,29 +5,30 @@ namespace Eisdealer {
     export let allObjects: Drawables[] = [];
     let chosenScoops: ScoopChosen[] = [];
     let colorPistacchio: string = "#93c572";
-    let colorStrawberry: string = "#d47274";
+    let colorStrawberry: string = "#C83f49";
     let colorVanille: string = "#F3E5AB";
     let colorChocolate: string = "#45322e";
     let maxCustomers = 4;
-    let cashRegister: CashRegister;
     let totalElement: HTMLElement;
+    let checkoutButton: HTMLButtonElement;
+    let resetButton: HTMLButtonElement;
     let orderItems: OrderItem[] = [];
+    let totalIncome: number = 0;
     const sidebarX = 1200;
-    let canvas: HTMLCanvasElement | null;
+
+    let canvas: HTMLCanvasElement;
 
     function handleLoad(_event: Event): void {
-        console.log("handleLoad");
-        canvas = document.querySelector("canvas");
+        canvas = document.querySelector("canvas") as HTMLCanvasElement;
         if (!canvas) return;
         crc2 = canvas.getContext("2d") as CanvasRenderingContext2D;
 
-        canvas.addEventListener("click", handleClick);
+        canvas.addEventListener("click", handleCanvasClick);
 
         initializeObjects();
         setInterval(animate, 20);
         createCustomer();
 
-        cashRegister = new CashRegister();
         drawPriceList();
 
         totalElement = document.createElement("div");
@@ -39,11 +40,17 @@ namespace Eisdealer {
         totalElement.style.zIndex = "10"; // Ensure the totalElement is in front of the canvas
         document.body.appendChild(totalElement);
 
-        updateTotalDisplay();
+        checkoutButton = document.getElementById("checkoutButton") as HTMLButtonElement;
+        checkoutButton.addEventListener("click", showCheckoutTotal);
+
+        resetButton = document.getElementById("resetButton") as HTMLButtonElement;
+        resetButton.addEventListener("click", resetTotal);
+
+        updateTotal();
     }
 
     function initializeObjects(): void {
-        let trash: Trash = new Trash(1000, 350);
+        let trash: Trash = new Trash(1100, 350);
         allObjects.push(trash);
 
         const chairs = [
@@ -61,11 +68,6 @@ namespace Eisdealer {
             new Scoop(500, 575, colorPistacchio)
         ];
         allObjects.push(...scoops);
-
-        scoops.forEach(scoop => {
-            const iceCreamItem = scoop.getIceCreamItem();
-            console.log(`Scoop at (${scoop.x}, ${scoop.y}) is ${iceCreamItem?.name} and costs ${iceCreamItem?.price}`);
-        });
     }
 
     function createCustomer(): void {
@@ -75,12 +77,12 @@ namespace Eisdealer {
             if (customerCount < maxCustomers) {
                 let customerX = 500;
                 let customerY = -50;
-                let customer = new Customer(customerX, customerY, new Vector(4, 4), new Vector(4, 4), `Customer ${customerCount + 1}`, allObjects);
+                let customer = new Customer(customerX, customerY, new Vector(0, 0), new Vector(4, 4), `Customer ${customerCount + 1}`, allObjects);
                 allObjects.push(customer);
             }
 
             if (customerCount < maxCustomers) {
-                setTimeout(createCustomersIfNeeded, 3000);
+                setTimeout(createCustomersIfNeeded, 1000);
             }
         }
         createCustomersIfNeeded();
@@ -118,10 +120,30 @@ namespace Eisdealer {
         allObjects = allObjects.filter(obj => !(obj instanceof ScoopChosen));
     }
 
-    export function handleClick(event: MouseEvent): void {
-        let canvasRect = (event.target as HTMLCanvasElement).getBoundingClientRect();
-        let clickX = event.clientX - canvasRect.left;
-        let clickY = event.clientY - canvasRect.top;
+    function handleCanvasClick(event: MouseEvent): void {
+        const canvasRect = (event.target as HTMLCanvasElement).getBoundingClientRect();
+        const clickX = event.clientX - canvasRect.left;
+        const clickY = event.clientY - canvasRect.top;
+
+        iceCreamItems.forEach((option, index) => {
+            if (
+                clickX > option.x &&
+                clickX < option.x + 200 &&
+                clickY > option.y &&
+                clickY < option.y + 150
+            ) {
+                addItemToOrder(iceCreamItems[index], 1);
+            }
+        });
+
+        if (
+            clickX > 800 &&
+            clickX < 900 &&
+            clickY > 500 &&
+            clickY < 570
+        ) {
+            addItemToOrder(iceCreamItems[5], 1);
+        }
 
         allObjects.forEach(item => {
             if (item instanceof Trash) {
@@ -138,7 +160,7 @@ namespace Eisdealer {
                 const distance = calculateDistance(clickX, clickY, item.x, item.y);
                 if (distance <= 50) {
                     checkOrder(item);
-                    return;
+                    deleteScoopChosen();
                 }
             }
         });
@@ -161,19 +183,30 @@ namespace Eisdealer {
                     if (distance <= scoopRadius) {
                         let flavorChosenScoop: string;
 
-                        if (item.color === colorPistacchio) {
-                            flavorChosenScoop = 'Pistazie';
-                        } else if (item.color === colorStrawberry) {
-                            flavorChosenScoop = 'Erdbeere';
-                        } else if (item.color === colorVanille) {
-                            flavorChosenScoop = 'Vanille';
-                        } else if (item.color === colorChocolate) {
-                            flavorChosenScoop = 'Schokolade';
-                        } else {
-                            flavorChosenScoop = 'unknown';
+                        switch (item.color) {
+                            case colorPistacchio:
+                                flavorChosenScoop = 'Pistazie';
+                                break;
+                            case colorStrawberry:
+                                flavorChosenScoop = 'Erdbeere';
+                                break;
+                            case colorVanille:
+                                flavorChosenScoop = 'Vanille';
+                                break;
+                            case colorChocolate:
+                                flavorChosenScoop = 'Schokolade';
+                                break;
+                            default:
+                                flavorChosenScoop = 'unknown';
+                                break;
                         }
 
-                        let chosenScoop = new ScoopChosen(scoopPositions[chosenScoops.length].x, scoopPositions[chosenScoops.length].y, item.color, flavorChosenScoop);
+                        let chosenScoop = new ScoopChosen(
+                            scoopPositions[chosenScoops.length].x,
+                            scoopPositions[chosenScoops.length].y,
+                            item.color,
+                            flavorChosenScoop
+                        );
                         chosenScoops.push(chosenScoop);
                         allObjects.push(chosenScoop);
 
@@ -209,10 +242,18 @@ namespace Eisdealer {
 
         if (correct) {
             customer.orderCompleted = true;
+            customer.orderCorrect = true;
             customer.leaving = true;
-            cashRegister.add(chosenScoops.length * 2);
-            updateTotalDisplay();
-            deleteScoopChosen();  // Clear chosen scoops after order is completed
+
+            // Add price to total income
+            const orderPrice = chosenScoops.length * 2; // Assuming each scoop costs 2€
+            totalIncome += orderPrice;
+
+            updateTotal();
+        } else {
+            customer.orderCompleted = true;
+            customer.orderCorrect = false;
+            customer.leaving = true;
         }
     }
 
@@ -236,27 +277,61 @@ namespace Eisdealer {
 
     function drawPriceList(): void {
         crc2.font = "30px Arial";
+        crc2.fillStyle = '#00000';
 
         // Draw Cash Register
+
+        crc2.strokeRect(sidebarX, 250, 300, 150);
+        crc2.font = "30px Arial";
+        crc2.fillText("Preisliste", sidebarX + 10, 280);
+        crc2.fillText("je Kugel: 2€", sidebarX + 50, 360);
+
         crc2.strokeRect(sidebarX, 450, 300, 250);
+        crc2.font = "30px Arial";
         crc2.fillText("Total", sidebarX + 10, 500);
         crc2.strokeRect(sidebarX + 50, 550, 200, 80);
     }
 
-    function addItemToOrder(item: IceCreamItem, quantity: number) {
+    function addItemToOrder(item: IceCreamItem, quantity: number): void {
         const existingItem = orderItems.find(orderItem => orderItem.name === item.name);
         if (existingItem) {
             existingItem.quantity += quantity;
-            existingItem.price += item.price * quantity;
+            existingItem.price = item.price * existingItem.quantity; // Update total price for this item
         } else {
             orderItems.push({ name: item.name, quantity, price: item.price * quantity });
         }
         updateTotal();
     }
 
-    function updateTotal() {
+    function updateTotal(): void {
         const total = orderItems.reduce((sum, item) => sum + item.price, 0);
         crc2.clearRect(sidebarX + 50, 550, 200, 80);
-        crc2.fillText(total.toFixed(2) + "€", sidebarX + 170, 600);
+        crc2.fillStyle = '#00000';
+        crc2.fillText(total.toFixed(0) + "€", sidebarX + 170, 600);
     }
+
+    function showCheckoutTotal(): void {
+        const total = orderItems.reduce((sum, item) => sum + item.price, 0);
+        crc2.clearRect(0, 0, crc2.canvas.width, crc2.canvas.height);
+        drawBackground();
+        drawPriceList();
+        crc2.fillStyle = '#000000';
+        crc2.font = "20px Arial";
+        crc2.fillText(" Total: " + total.toFixed(0) + "€", crc2.canvas.width - 200, 50);
+    }
+
+    function resetTotal(): void {
+        chosenScoops = [];
+        orderItems = [];
+        totalIncome = 0; // Reset total income
+        updateTotal();
+    }
+
+    const iceCreamItems = [
+        { name: 'Vanilla', x: 150, y: 575, price: 2 },
+        { name: 'Strawberry', x: 500, y: 350, price: 2 },
+        { name: 'Chocolate', x: 150, y: 350, price: 2 },
+        { name: 'Pistachio', x: 500, y: 575, price: 2 },
+        // Add more items as needed
+    ];
 }
