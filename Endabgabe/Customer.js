@@ -85,22 +85,20 @@ var Eisdealer;
         }
         // Methode, die den Zustand "sit" behandelt.
         handleSit() {
-            // Wenn die Bestellung abgeschlossen ist, wird überprüft, ob sie korrekt ist und der Kunde bereitet sich darauf vor, zu gehen.
+            // When the order is completed, check if it's correct and prepare the customer to leave.
             if (this.orderCompleted) {
-                if (this.isOrderCorrect()) {
-                    this.mood = 'ecstatic'; // Wenn die Bestellung korrekt ist, wird die Stimmung auf "ecstatic" gesetzt.
-                    this.speed = new Eisdealer.Vector(1, 1);
-                    this.state = "leave";
-                    this.leaving = true;
+                if (this.orderCorrect) {
+                    this.mood = 'ecstatic'; // If the order is correct, set the mood to "ecstatic".
                 }
                 else {
-                    this.mood = 'sad'; // Wenn die Bestellung nicht korrekt ist, wird die Stimmung auf "sad" gesetzt.
-                    this.state = "leave";
-                    this.leaving = true;
+                    this.mood = 'sad'; // If the order is not correct, set the mood to "sad".
                 }
+                this.speed = new Eisdealer.Vector(1, 1);
+                this.state = "leave";
+                this.leaving = true;
             }
             else if (Date.now() - this.waitStartTime > 10000) {
-                // Wenn der Kunde länger als 10 Sekunden wartet und die Bestellung noch nicht abgeschlossen ist, wird die Stimmung auf "sad" gesetzt.
+                // If the customer waits longer than 10 seconds and the order is not completed, set the mood to "sad".
                 this.mood = 'sad';
             }
         }
@@ -156,38 +154,38 @@ var Eisdealer;
             }
             this.drawOrder(); // Zeichnet die Bestellung des Kunden.
         }
-        // Methode zur Überprüfung, ob die Bestellung des Kunden korrekt ist.
-        isOrderCorrect() {
-            return this.order.length > 0 && Math.random() > 0.5; // Gibt zufällig true oder false zurück, um zu simulieren, ob die Bestellung korrekt ist.
-        }
+        // // Methode zur Überprüfung, ob die Bestellung des Kunden korrekt ist.
+        // private isOrderCorrect(): boolean {
+        //     return this.order.length > 0 && Math.random() > 0.5; // Gibt zufällig true oder false zurück, um zu simulieren, ob die Bestellung korrekt ist.
+        // }
         // Methode, um den Kunden zu zeichnen (darzustellen).
         draw() {
             if (this.allObjects.includes(this)) {
                 const x = this.x;
                 const y = this.y;
                 Eisdealer.crc2.beginPath();
-                Eisdealer.crc2.arc(x, y, this.radius, 0, Math.PI * 2); // Zeichnet den Kopf des Kunden.
+                Eisdealer.crc2.arc(x, y, this.radius, 0, Math.PI * 2); // Draw the customer's head
                 Eisdealer.crc2.fillStyle = this.skin;
                 Eisdealer.crc2.strokeStyle = "#000000";
                 Eisdealer.crc2.fill();
                 Eisdealer.crc2.lineWidth = 2;
                 Eisdealer.crc2.stroke();
-                // Zeichnet die Augen des Kunden.
+                // Draw the customer's eyes
                 Eisdealer.crc2.beginPath();
                 Eisdealer.crc2.arc(x - 15, y - 10, 5, 0, Math.PI * 2);
                 Eisdealer.crc2.arc(x + 15, y - 10, 5, 0, Math.PI * 2);
                 Eisdealer.crc2.fillStyle = '#000000';
                 Eisdealer.crc2.fill();
-                // Zeichnet den Mund des Kunden basierend auf seiner Stimmung.
+                // Draw the customer's mouth based on their mood
                 Eisdealer.crc2.beginPath();
                 if (this.mood === 'happy') {
-                    Eisdealer.crc2.arc(x, y + 10, 15, 0, Math.PI, false); // Lächeln für glückliche Stimmung.
+                    Eisdealer.crc2.arc(x, y + 10, 15, 0, Math.PI, false); // Smile for happy mood
                 }
                 else if (this.mood === 'sad') {
-                    Eisdealer.crc2.arc(x, y + 20, 15, 0, Math.PI, true); // Trauriger Mund für traurige Stimmung.
+                    Eisdealer.crc2.arc(x, y + 20, 15, 0, Math.PI, true); // Sad mouth for sad mood
                 }
                 else if (this.mood === 'ecstatic') {
-                    Eisdealer.crc2.arc(x, y + 10, 20, 0, Math.PI, false); // Erweiterte Mundform für ekstatische Stimmung.
+                    Eisdealer.crc2.arc(x, y + 10, 20, 0, Math.PI, false); // Wide smile for ecstatic mood
                     Eisdealer.crc2.moveTo(x - 20, y + 10);
                     Eisdealer.crc2.lineTo(x + 20, y + 10);
                 }

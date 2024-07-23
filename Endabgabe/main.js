@@ -39,7 +39,7 @@ var Eisdealer;
         // Initialisiere alle Objekte (Stühle, Müll, Eiskugeln)
         initializeObjects();
         // Starte die Animationsschleife alle 20 Millisekunden
-        setInterval(animate, 20);
+        setInterval(animate, 25);
         // Erzeuge erste Kunden
         createCustomer();
         // Zeichne die Preisliste auf die Canvas
@@ -235,29 +235,24 @@ var Eisdealer;
     // Überprüfe, ob die Bestellung des Kunden korrekt ist
     function checkOrder(customer) {
         let correct = true;
-        // Vergleiche die ausgewählten Eiskugeln mit der Bestellung des Kunden
-        for (let i = 0; i < chosenScoops.length; i++) {
-            const chosenScoop = chosenScoops[i];
+        // Compare the selected scoops with the customer's order
+        for (let i = 0; i < customer.order.length; i++) {
             const customerOrder = customer.order[i];
-            if (!customerOrder || chosenScoop.flavor !== customerOrder.flavor) {
+            const chosenScoop = chosenScoops[i];
+            if (!chosenScoop || customerOrder.flavor !== chosenScoop.flavor) {
                 correct = false;
                 break;
             }
         }
-        // Falls die Bestellung korrekt ist
+        // Update the order completion and correctness status
+        customer.orderCompleted = true;
+        customer.orderCorrect = correct;
+        customer.leaving = true;
+        // If the order is correct, add the price to the total income
         if (correct) {
-            customer.orderCompleted = true;
-            customer.orderCorrect = true;
-            customer.leaving = true;
-            // Füge den Preis zur Gesamteinnahme hinzu
-            const orderPrice = chosenScoops.length * 2; // Annahme: Jede Kugel kostet 2€
+            const orderPrice = customer.order.length * 2; // Assuming each scoop costs 2€
             totalIncome += orderPrice;
-            updateTotal(); // Aktualisiere den Gesamtbetrag
-        }
-        else {
-            customer.orderCompleted = true;
-            customer.orderCorrect = false;
-            customer.leaving = true;
+            updateTotal(); // Update the total amount
         }
     }
     // Zeichne den Hintergrund der Canvas

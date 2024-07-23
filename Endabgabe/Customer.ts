@@ -55,6 +55,7 @@ namespace Eisdealer {
                     break;
             }
         }
+        
 
         // Methode, die den Zustand "walk in" behandelt.
         private handleWalkIn(): void {
@@ -92,23 +93,22 @@ namespace Eisdealer {
 
         // Methode, die den Zustand "sit" behandelt.
         private handleSit(): void {
-            // Wenn die Bestellung abgeschlossen ist, wird überprüft, ob sie korrekt ist und der Kunde bereitet sich darauf vor, zu gehen.
+            // When the order is completed, check if it's correct and prepare the customer to leave.
             if (this.orderCompleted) {
-                if (this.isOrderCorrect()) {
-                    this.mood = 'ecstatic'; // Wenn die Bestellung korrekt ist, wird die Stimmung auf "ecstatic" gesetzt.
-                    this.speed = new Vector(1, 1);
-                    this.state = "leave";
-                    this.leaving = true;
+                if (this.orderCorrect) {
+                    this.mood = 'ecstatic'; // If the order is correct, set the mood to "ecstatic".
                 } else {
-                    this.mood = 'sad'; // Wenn die Bestellung nicht korrekt ist, wird die Stimmung auf "sad" gesetzt.
-                    this.state = "leave";
-                    this.leaving = true;
+                    this.mood = 'sad'; // If the order is not correct, set the mood to "sad".
                 }
+                this.speed = new Vector(1, 1);
+                this.state = "leave";
+                this.leaving = true;
             } else if (Date.now() - this.waitStartTime > 10000) {
-                // Wenn der Kunde länger als 10 Sekunden wartet und die Bestellung noch nicht abgeschlossen ist, wird die Stimmung auf "sad" gesetzt.
+                // If the customer waits longer than 10 seconds and the order is not completed, set the mood to "sad".
                 this.mood = 'sad';
             }
         }
+        
 
         // Methode, die den Zustand "leave" behandelt.
         private handleLeave(): void {
@@ -168,10 +168,10 @@ namespace Eisdealer {
             this.drawOrder(); // Zeichnet die Bestellung des Kunden.
         }
 
-        // Methode zur Überprüfung, ob die Bestellung des Kunden korrekt ist.
-        private isOrderCorrect(): boolean {
-            return this.order.length > 0 && Math.random() > 0.5; // Gibt zufällig true oder false zurück, um zu simulieren, ob die Bestellung korrekt ist.
-        }
+        // // Methode zur Überprüfung, ob die Bestellung des Kunden korrekt ist.
+        // private isOrderCorrect(): boolean {
+        //     return this.order.length > 0 && Math.random() > 0.5; // Gibt zufällig true oder false zurück, um zu simulieren, ob die Bestellung korrekt ist.
+        // }
 
         // Methode, um den Kunden zu zeichnen (darzustellen).
         public draw(): void {
@@ -179,28 +179,28 @@ namespace Eisdealer {
                 const x = this.x;
                 const y = this.y;
                 crc2.beginPath();
-                crc2.arc(x, y, this.radius, 0, Math.PI * 2); // Zeichnet den Kopf des Kunden.
+                crc2.arc(x, y, this.radius, 0, Math.PI * 2); // Draw the customer's head
                 crc2.fillStyle = this.skin;
                 crc2.strokeStyle = "#000000";
                 crc2.fill();
                 crc2.lineWidth = 2;
                 crc2.stroke();
-
-                // Zeichnet die Augen des Kunden.
+        
+                // Draw the customer's eyes
                 crc2.beginPath();
                 crc2.arc(x - 15, y - 10, 5, 0, Math.PI * 2);
                 crc2.arc(x + 15, y - 10, 5, 0, Math.PI * 2);
                 crc2.fillStyle = '#000000';
                 crc2.fill();
-
-                // Zeichnet den Mund des Kunden basierend auf seiner Stimmung.
+        
+                // Draw the customer's mouth based on their mood
                 crc2.beginPath();
                 if (this.mood === 'happy') {
-                    crc2.arc(x, y + 10, 15, 0, Math.PI, false); // Lächeln für glückliche Stimmung.
+                    crc2.arc(x, y + 10, 15, 0, Math.PI, false); // Smile for happy mood
                 } else if (this.mood === 'sad') {
-                    crc2.arc(x, y + 20, 15, 0, Math.PI, true); // Trauriger Mund für traurige Stimmung.
+                    crc2.arc(x, y + 20, 15, 0, Math.PI, true); // Sad mouth for sad mood
                 } else if (this.mood === 'ecstatic') {
-                    crc2.arc(x, y + 10, 20, 0, Math.PI, false); // Erweiterte Mundform für ekstatische Stimmung.
+                    crc2.arc(x, y + 10, 20, 0, Math.PI, false); // Wide smile for ecstatic mood
                     crc2.moveTo(x - 20, y + 10);
                     crc2.lineTo(x + 20, y + 10);
                 }
@@ -208,6 +208,7 @@ namespace Eisdealer {
                 crc2.stroke();
             }
         }
+        
 
         // Methode, die momentan leer ist und möglicherweise in der Zukunft verwendet werden soll.
         public update(): void {}
