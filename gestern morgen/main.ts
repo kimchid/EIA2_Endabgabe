@@ -242,8 +242,8 @@ namespace Eisdealer {
 
         if (correct) {
             customer.orderCompleted = true;
-            customer.leaving = true;
             customer.orderCorrect = true;
+            customer.leaving = true;
 
             // Add price to total income
             const orderPrice = chosenScoops.length * 2; // Assuming each scoop costs 2€
@@ -252,8 +252,8 @@ namespace Eisdealer {
             updateTotal();
         } else {
             customer.orderCompleted = true;
-            customer.leaving = true;
             customer.orderCorrect = false;
+            customer.leaving = true;
         }
     }
 
@@ -306,17 +306,9 @@ namespace Eisdealer {
     function updateTotal(): void {
         const total = orderItems.reduce((sum, item) => sum + item.price, 0);
         crc2.clearRect(sidebarX + 50, 550, 200, 80);
-        crc2.fillText(total.toFixed(0) + "€", sidebarX + 170, 600);
         crc2.fillStyle = '#00000';
-
-        updateTotal(); // Update the display
+        crc2.fillText(total.toFixed(0) + "€", sidebarX + 170, 600);
     }
-
-    // function updateTotalDisplay(): void {
-    //     const total = orderItems.reduce((sum, item) => sum + item.price, 0);
-    //     crc2.fillStyle = '#00000';
-    //     totalElement.textContent = "Total: " + total.toFixed(0) + "€";
-    // }
 
     function showCheckoutTotal(): void {
         const total = orderItems.reduce((sum, item) => sum + item.price, 0);

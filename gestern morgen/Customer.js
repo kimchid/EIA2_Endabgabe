@@ -59,13 +59,20 @@ var Eisdealer;
             }
         }
         handleSit() {
-            if (this.orderCompleted && this.isOrderCorrect()) {
-                this.mood = 'ecstatic';
-                this.speed = new Eisdealer.Vector(1, 1);
-                this.state = "leave";
-                this.leaving = true;
+            if (this.orderCompleted) {
+                if (this.isOrderCorrect()) {
+                    this.mood = 'ecstatic';
+                    this.speed = new Eisdealer.Vector(1, 1);
+                    this.state = "leave";
+                    this.leaving = true;
+                }
+                else {
+                    this.mood = 'sad';
+                    this.state = "leave";
+                    this.leaving = true;
+                }
             }
-            else if (Date.now() - this.waitStartTime > 40000) {
+            else if (Date.now() - this.waitStartTime > 10000) {
                 this.mood = 'sad';
             }
         }
@@ -123,7 +130,9 @@ var Eisdealer;
             this.drawOrder();
         }
         isOrderCorrect() {
-            return this.order.length > 0;
+            // Implement your logic to check if the order is correct
+            // This is just a placeholder implementation
+            return this.order.length > 0 && Math.random() > 0.5;
         }
         leave() {
             this.speed = new Eisdealer.Vector(5, 5);

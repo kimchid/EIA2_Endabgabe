@@ -197,8 +197,8 @@ var Eisdealer;
         }
         if (correct) {
             customer.orderCompleted = true;
-            customer.leaving = true;
             customer.orderCorrect = true;
+            customer.leaving = true;
             // Add price to total income
             const orderPrice = chosenScoops.length * 2; // Assuming each scoop costs 2€
             totalIncome += orderPrice;
@@ -206,8 +206,8 @@ var Eisdealer;
         }
         else {
             customer.orderCompleted = true;
-            customer.leaving = true;
             customer.orderCorrect = false;
+            customer.leaving = true;
         }
     }
     function drawBackground() {
@@ -251,15 +251,9 @@ var Eisdealer;
     function updateTotal() {
         const total = orderItems.reduce((sum, item) => sum + item.price, 0);
         Eisdealer.crc2.clearRect(sidebarX + 50, 550, 200, 80);
-        Eisdealer.crc2.fillText(total.toFixed(0) + "€", sidebarX + 170, 600);
         Eisdealer.crc2.fillStyle = '#00000';
-        updateTotal(); // Update the display
+        Eisdealer.crc2.fillText(total.toFixed(0) + "€", sidebarX + 170, 600);
     }
-    // function updateTotalDisplay(): void {
-    //     const total = orderItems.reduce((sum, item) => sum + item.price, 0);
-    //     crc2.fillStyle = '#00000';
-    //     totalElement.textContent = "Total: " + total.toFixed(0) + "€";
-    // }
     function showCheckoutTotal() {
         const total = orderItems.reduce((sum, item) => sum + item.price, 0);
         Eisdealer.crc2.clearRect(0, 0, Eisdealer.crc2.canvas.width, Eisdealer.crc2.canvas.height);
