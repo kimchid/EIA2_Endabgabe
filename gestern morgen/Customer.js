@@ -110,16 +110,6 @@ var Eisdealer;
             customer.state = "walk in";
             customer.mood = "happy";
         }
-        getReceipt() {
-            let amount = 0;
-            let receiptContent = "<h3>Receipt</h3><ul>";
-            receiptContent += `</ul><p>Total: ${amount} €</p>`;
-            const receiptElement = document.getElementById("receipt");
-            if (receiptElement) {
-                receiptElement.innerHTML = receiptContent;
-            }
-            return amount;
-        }
         placeOrder() {
             const numScoops = Math.floor(Math.random() * 2) + 1;
             const availableFlavors = ["Schokolade", "Erdbeere", "Vanille", "Pistazie"];
@@ -130,8 +120,6 @@ var Eisdealer;
             this.drawOrder();
         }
         isOrderCorrect() {
-            // Implement your logic to check if the order is correct
-            // This is just a placeholder implementation
             return this.order.length > 0 && Math.random() > 0.5;
         }
         leave() {
