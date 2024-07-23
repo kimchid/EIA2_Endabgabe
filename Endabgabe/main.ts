@@ -43,7 +43,7 @@ namespace Eisdealer {
         // Initialisiere alle Objekte (Stühle, Müll, Eiskugeln)
         initializeObjects();
         // Starte die Animationsschleife alle 20 Millisekunden
-        setInterval(animate, 20);
+        setInterval(animate, 25);
         // Erzeuge erste Kunden
         createCustomer();
 
